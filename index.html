@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Penjualan</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: linear-gradient(to bottom, #ffccee, #e6f3ff);
+}
+
+h1 {
+  text-align: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+input, select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+button {
+  background: #fc66ff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #3399ff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.income { color: green; }
+.expense { color: red; }
+</style>
+</head>
+<body>
+
+<h1>📊 Dashboard Penjualan</h1>
+
+<div class="container">
+
+  <div class="card">
+    <h3>Tambah Transaksi</h3>
+    <input type="text" id="desc" placeholder="Keterangan">
+    <input type="number" id="amount" placeholder="Jumlah">
+    <select id="type">
+      <option value="income">Pemasukan</option>
+      <option value="expense">Pengeluaran</option>
+    </select>
+    <button onclick="addData()">Tambah</button>
+  </div>
+
+  <div class="card">
+    <h3>Tabel Keuangan</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Keterangan</th>
+          <th>Jumlah</th>
+          <th>Tipe</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Diagram Penjualan</h3>
+    <canvas id="chart"></canvas>
+  </div>
+
+</div>
+
+<script>
+let dataList = [];
+
+function addData() {
+  const desc = document.getElementById('desc').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const type = document.getElementById('type').value;
+
+  if (!desc || !amount) return;
+
+  const data = { desc, amount, type };
+  dataList.push(data);
+
+  renderTable();
+  updateChart();
+
+  document.getElementById('desc').value = '';
+  document.getElementById('amount').value = '';
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  dataList.forEach((item, index) => {
+    const row = `<tr>
+      <td>${index + 1}</td>
+      <td>${item.desc}</td>
+      <td class="${item.type}">${item.amount}</td>
+      <td>${item.type}</td>
+    </tr>`;
+    tbody.innerHTML += row;
+  });
+}
+
+const ctx = document.getElementById('chart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Pemasukan', 'Pengeluaran'],
+    datasets: [{
+      label: 'Jumlah',
+      data: [0, 0]
+    }]
+  }
+});
+
+function updateChart() {
+  let income = 0;
+  let expense = 0;
+
+  dataList.forEach(item => {
+    if (item.type === 'income') income += item.amount;
+    else expense += item.amount;
+  });
+
+  chart.data.datasets[0].data = [income, expense];
+  chart.update();
+}
+</script>
+
+</body>
+</html>
